@@ -12,6 +12,15 @@
 
 // ----------------------------------------------------------------------------
 template<typename T=float>
+struct TVec3 {
+  using type = float3;
+};
+template<>
+struct TVec3<double> {
+  using type = double3;
+};
+
+template<typename T=float>
 struct TVec4 {
   using type = float4;
 };
@@ -41,13 +50,13 @@ struct Parameters
   T xmax=100.0;         //in mm
   T ymax=100.0;         //  ""
   T zmax=100.0;         //  ""
-  T zlevel = 0.0;       // eg zmax/2.0
+  T zlevel = 50.0;       // eg zmax/2.0
   T NV=0.0333;          // in 1/mm³
   T mu=0.7;           //in rad^(-1)
   T fdiam=0.2;       // in mm
   T sigmafu=2500.0;      // in MPA
-  T d_end=3;                //in mm
-  uint n_d=20; //Anzahl der Schrittzahl bei der Spaltöffnung (:Vielfaches von 4)
+  T d_end=0.3;                //in mm (changed from 3 to 0.3)
+  uint n_d=200; //Anzahl der Schrittzahl bei der Spaltöffnung
 
 //  T beta_c = 2.0;
   T weib_m = 10.0;

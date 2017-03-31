@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8)
-project(poisson)
+project(fibercrack)
 
 find_package(CUDA REQUIRED)
 
@@ -32,7 +32,7 @@ include(FindCUDA)
 include_directories(${CUDA_INCLUDE_DIRS})
 
 list(APPEND CUDA_NVCC_FLAGS "-std=c++11") #--ftz=false") # || --use_fast_math
-#list(APPEND CUDA_NVCC_FLAGS "-gencode arch=compute_20,code=compute_20")
+list(APPEND CUDA_NVCC_FLAGS "-gencode arch=compute_20,code=compute_20")
 list(APPEND CUDA_NVCC_FLAGS "-gencode arch=compute_30,code=compute_30")
 set(CUDA_PROPAGATE_HOST_FLAGS OFF)
 
