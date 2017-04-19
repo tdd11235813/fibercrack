@@ -19,9 +19,9 @@ public:
       ("file,f", po::value<std::string>(&configuration_file_), "simulation configuration filename (will be created on demand)")
       ("output,o", po::value<std::string>(&output_file_)->default_value("result.csv"), "output csv file, will be overwritten!")
       ("device,i", po::value<int>(&device_id_)->default_value(0), "CUDA device id")
-      ("double-precision,d", po::value<bool>(&double_precision_)->default_value(false), "use double-precision instead of single-precision")
+      ("double-precision,d", "use double-precision instead of single-precision")
       ("dump,D", "dump intermediates for verification")
-      ("verbose,v", "for console output (unused)")
+      ("verbose,v", "for console output")
       ;
 
     po::variables_map vm;
@@ -33,9 +33,19 @@ public:
       if( vm.count("dump")  ) {
         dump_intermediates_ = true;
       }
+
+      if( vm.count("double-precision")  ) {
+        double_precision_ = 1;
+      }
+
+      if( vm.count("verbose")  ) {
+        verbose_ = 1;
+      }
+
       if( vm.count("help")  ) {
         help_requested_ = true;
       }
+
       if( !vm.count("file") ) {
         throw po::error("Please provide a configuration file name.");
       }
@@ -55,7 +65,7 @@ public:
 
   template<typename T>
   Configuration<T> configuration() const {
-    return ConfigurationReader<T>()(configuration_file_);
+    return ConfigurationReader<T>(verbose())(configuration_file_);
   }
 
   std::string output_file() const {
@@ -78,11 +88,16 @@ public:
     return device_id_;
   }
 
+  int verbose() const {
+    return verbose_;
+  }
+
 private:
 
   std::string configuration_file_;
   std::string output_file_;
   int device_id_ = 0;
+  int verbose_ = 0;
   bool double_precision_ = false;
   bool help_requested_   = false;
   bool dump_intermediates_ = false;

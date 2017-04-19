@@ -5,6 +5,7 @@
 
 #include <boost/program_options.hpp>
 
+#include <stdexcept>
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -49,60 +50,62 @@ struct ConfigurationMapper {
 };
 
 template<typename T>
-struct ConfigurationWriter
-{
-  Configuration<T> config_;
-
-  ConfigurationWriter(Configuration<T> _config)
-    : config_(_config) {}
-
-  void operator()(const std::string& fname) {
-    std::ofstream fsconf(fname);
-
-    fsconf
+std::ostream& operator<<(std::ostream& _fs, const Configuration<T>& _config) {
+  return _fs
       << "version = 0.1" << "\n"
-      << "lambda = " << config_.lambda << "\n"
-      << "nr = " << config_.nr << "\n"
-      << "rand_seed = " << config_.rand_seed << "\n"
-      << "rand_offset = " << config_.rand_offset << "\n"
-      << "xmax = " << config_.xmax << "\n"
-      << "ymax = " << config_.ymax << "\n"
-      << "zmax = " << config_.zmax << "\n"
-      << "zlevel = " << config_.zlevel << "\n"
-      << "NV = " << config_.NV << "\n"
-      << "mu = " << config_.mu << "\n"
-      << "fdiam = " << config_.fdiam << "\n"
-      << "sigmafu = " << config_.sigmafu << "\n"
-      << "d_end = " << config_.d_end << "\n"
-      << "n_d = " << config_.n_d << "\n"
-      << "weib_m = " << config_.weib_m << "\n"
-      << "weib_xc = " << config_.weib_xc << "\n"
-      << "fis_k = " << config_.fis_k << "\n"
-      << "fis_b = " << config_.fis_b << "\n"
-      << "fis_x0 = " << config_.fis_x0 << "\n"
-      << "fis_c = " << config_.fis_c << "\n"
+      << "lambda = " << _config.lambda << "\n"
+      << "nr = " << _config.nr << "\n"
+      << "rand_seed = " << _config.rand_seed << "\n"
+      << "rand_offset = " << _config.rand_offset << "\n"
+      << "xmax = " << _config.xmax << "\n"
+      << "ymax = " << _config.ymax << "\n"
+      << "zmax = " << _config.zmax << "\n"
+      << "zlevel = " << _config.zlevel << "\n"
+      << "NV = " << _config.NV << "\n"
+      << "mu = " << _config.mu << "\n"
+      << "fdiam = " << _config.fdiam << "\n"
+      << "sigmafu = " << _config.sigmafu << "\n"
+      << "d_end = " << _config.d_end << "\n"
+      << "n_d = " << _config.n_d << "\n"
+      << "weib_m = " << _config.weib_m << "\n"
+      << "weib_xc = " << _config.weib_xc << "\n"
+      << "fis_k = " << _config.fis_k << "\n"
+      << "fis_b = " << _config.fis_b << "\n"
+      << "fis_x0 = " << _config.fis_x0 << "\n"
+      << "fis_c = " << _config.fis_c << "\n"
       ;
-  }
-
-};
+}
 
 template<typename T>
 struct ConfigurationReader
 {
+  int verbose_ = 0;
+  ConfigurationReader(int _verbose) : verbose_(_verbose) {}
 
-  Configuration<T> operator()(const std::string& fname) {
+  Configuration<T> operator()(const std::string& _fname) {
     namespace po = boost::program_options;
 
     ConfigurationMapper<T> config_mapper;
-    std::ifstream fsconf(fname);
 
+    std::ifstream fsconf(_fname);
     if(fsconf.good()==false) {
-      ConfigurationWriter<T>(config_mapper.config_)(fname);
+      fsconf.close();
+
+      std::ofstream fsconf_new(_fname);
+      if(fsconf_new.good()) {
+        fsconf_new << config_mapper.config_;
+        if(verbose_)
+          std::cout << "Initial configuration file '"<<_fname<<"' created.\n";
+      }else
+        throw std::runtime_error("Could not create configuration file.");
     }
 
     auto vm = po::variables_map();
     po::store(po::parse_config_file(fsconf, config_mapper.desc_), vm);
     po::notify(vm);
+
+    if(verbose_)
+      std::cout << "Configuration file '"<<_fname<<"' loaded.\n";
 
     return config_mapper.config_;
   }

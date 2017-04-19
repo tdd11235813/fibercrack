@@ -4,6 +4,8 @@
 #include "kernel.cuh"
 #include "configuration.hpp"
 
+#include <iomanip>
+#include <stdexcept>
 #include <iostream>
 #include <fstream>
 #include <chrono>
@@ -45,17 +47,26 @@ void cuda_free_data(Data<T>& _data) {
 
 
 template<typename T>
-void run( const Options& options )
+void run( const Options& _options )
 {
-  Application<T> app( options );
+  Application<T> app( _options );
 
   Configuration<T> config = app.configuration();
   std::vector<uint> numbers_fibers(config.nr);
 
   std::ofstream fs;
   fs.open(app.output_file(), std::ofstream::out);
-  fs << "; \"number repetitions\", " << config.nr << "\n";
-  fs << "\"iteration n_r\", \"iteration n_d\", \"d\", \"sum force\"\n";
+
+  if(fs.good()==false)
+    throw std::runtime_error("Could not open result file.");
+
+  // csv header
+  fs << listCudaDevices().str() << "\n"
+     << config
+     << std::string(3, '\n')  // 3x '\n'
+     << std::string(8, '-') << "\n"
+     << "\"iteration n_r\", \"iteration n_d\", \"d\", \"sum force\""
+     << "\n";
   fs.close();
 
   cuda_initialize( app );
@@ -63,19 +74,26 @@ void run( const Options& options )
   cuda_compute_number_of_fibers(app, numbers_fibers.data());
 
   fs.open(app.output_file(), std::ofstream::out | std::ofstream::app);
+  fs.setf(std::ios::scientific);
+  fs.precision(9);
 
   // we have our poisson numbers in *_h, so loop over them for the main algorithm
   // possible to parallelize over devices/nodes
   for(int j=0; j<config.nr; ++j) {
 
     uint nr_fibers = numbers_fibers[j];
-    std::cerr << nr_fibers << " fiber objects.\n";
+
+    if(_options.verbose()) {
+      std::cout << nr_fibers << " fiber objects.\n";
+    }
 
     Data<T> data;
     cuda_allocate_data(data, nr_fibers);
 
     int nr_intersections = cuda_create_and_intersect_fibers(app, data, nr_fibers);
-    std::cerr << nr_intersections << " intersections found.\n";
+    if(app.verbose()) {
+      std::cout << nr_intersections << " intersections found.\n";
+    }
 
 
     if(app.dump_intermediates()) {
@@ -124,9 +142,11 @@ void run( const Options& options )
         delete[] host;
       }
 
-
-
-      fs << j << ", " << k << ", " << dstep << ", " << force << "\n";
+      fs << std::setw(3) << j
+         << ", " << std::setw(3) << k
+         << ", " << std::setw(11) << dstep
+         << ", " << std::setw(11) << force
+         << "\n";
 
     } // for n_d
 
@@ -135,20 +155,23 @@ void run( const Options& options )
   } // for config.nr
 
   fs.close();
-  std::cout << "Result dumped to " << app.output_file() << "\n";
+  if(app.verbose()) {
+    std::cout << "Result dumped to " << app.output_file() << "\n";
+  }
 }
 
-int main(int argc, char** argv)
+int main(int _argc, char** _argv)
 {
-
-  std::cout
-    << "\nfibercrack - 04/2017\n\n"
-    << listCudaDevices().str() << "\n";
-
-  Options options(argc, argv);
+  Options options(_argc, _argv);
 
   if(options.help_requested())
     return 0;
+
+  if(options.verbose()) {
+    std::cout
+      << "\nfibercrack - 04/2017\n\n"
+      << listCudaDevices().str() << "\n";
+  }
 
   if(options.double_precision()) {
     run<double>(options);
