@@ -20,7 +20,7 @@ public:
       ("output,o", po::value<std::string>(&output_file_)->default_value("result.csv"), "output csv file, will be overwritten!")
       ("device,i", po::value<int>(&device_id_)->default_value(0), "CUDA device id")
       ("double-precision,d", po::value<bool>(&double_precision_)->default_value(false), "use double-precision instead of single-precision")
-      ("dump,D", po::value<bool>(&dump_intermediates_)->default_value(false), "dump intermediates for verification")
+      ("dump,D", "dump intermediates for verification")
       ("verbose,v", "for console output (unused)")
       ;
 
@@ -30,20 +30,23 @@ public:
         = po::command_line_parser( _argc, _argv ).options(desc).allow_unregistered().run();
       po::store(parsed, vm);
 
+      if( vm.count("dump")  ) {
+        dump_intermediates_ = true;
+      }
       if( vm.count("help")  ) {
-        std::cout << desc << "\n";
         help_requested_ = true;
       }
-      po::notify(vm);
       if( !vm.count("file") ) {
         throw po::error("Please provide a configuration file name.");
       }
+      po::notify(vm);
     } catch(po::error& e) {
       std::cerr << e.what() << "\n";
-      std::cout << desc <<  "\n";
       help_requested_ = true;
     }
-
+    if(help_requested_) {
+      std::cout << desc << "\n";
+    }
   }
 
   std::string configuration_file() const {
