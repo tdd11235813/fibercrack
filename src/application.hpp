@@ -33,7 +33,10 @@ public:
     _conf.fis_x0= (1.0-_conf.fis_b)/(1.0+_conf.fis_b);
     _conf.fis_c = _conf.fis_k*_conf.fis_x0
       + 2.0*log(1.0-_conf.fis_x0*_conf.fis_x0);
+    _conf.Af = 0.25 * _conf.fdiam * _conf.diam * PI;
+    _conf.NV = _conf.Vf/(_conf.Af*_conf.EL);
     _conf.lambda = _conf.xmax * _conf.ymax * _conf.zmax * _conf.NV;
+    _conf.zlevel_abs = _conf.zlevel_rel * _conf.zmax;
 
     configuration_ = _conf;
 

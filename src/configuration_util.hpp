@@ -25,26 +25,23 @@ struct ConfigurationMapper {
 
     desc_.add_options()
       ("version", po::value<double>(&version_), "version")
-      ("lambda", po::value<T>(&config_.lambda), "lambda")
-      ("nr", po::value<uint>(&config_.nr), "nr")
+      ("number_repetitions", po::value<uint>(&config_.nr), "nr")
       ("rand_seed", po::value<int>(&config_.rand_seed), "rand_seed")
       ("rand_offset", po::value<int>(&config_.rand_offset), "rand_offset")
       ("xmax", po::value<T>(&config_.xmax), "xmax")
       ("ymax", po::value<T>(&config_.ymax), "ymax")
       ("zmax", po::value<T>(&config_.zmax), "zmax")
-      ("zlevel", po::value<T>(&config_.zlevel), "zlevel")
-      ("NV", po::value<T>(&config_.NV), "NV")
-      ("mu", po::value<T>(&config_.mu), "mu")
+      ("zlevel_relative", po::value<T>(&config_.zlevel_rel), "zlevel_rel")
+      ("avg_fiberlength", po::value<T>(&config_.EL), "EL")
+      ("vol_fiber", po::value<T>(&config_.Vf), "Vf")
       ("fdiam", po::value<T>(&config_.fdiam), "fdiam")
+      ("mu", po::value<T>(&config_.mu), "mu")
       ("sigmafu", po::value<T>(&config_.sigmafu), "sigmafu")
       ("d_end", po::value<T>(&config_.d_end), "d_end")
       ("n_d", po::value<uint>(&config_.n_d), "n_d")
       ("weib_m", po::value<T>(&config_.weib_m), "weib_m")
       ("weib_xc", po::value<T>(&config_.weib_xc), "weib_xc")
       ("fis_k", po::value<T>(&config_.fis_k), "fis_k")
-      ("fis_b", po::value<T>(&config_.fis_b), "fis_b")
-      ("fis_x0", po::value<T>(&config_.fis_x0), "fis_x0")
-      ("fis_c", po::value<T>(&config_.fis_c), "fis_c")
       ;
   }
 };
@@ -53,26 +50,23 @@ template<typename T>
 std::ostream& operator<<(std::ostream& _fs, const Configuration<T>& _config) {
   return _fs
       << "version = 0.1" << "\n"
-      << "lambda = " << _config.lambda << "\n"
-      << "nr = " << _config.nr << "\n"
+      << "number_repetitions = " << _config.nr << "\n"
       << "rand_seed = " << _config.rand_seed << "\n"
       << "rand_offset = " << _config.rand_offset << "\n"
       << "xmax = " << _config.xmax << "\n"
       << "ymax = " << _config.ymax << "\n"
       << "zmax = " << _config.zmax << "\n"
-      << "zlevel = " << _config.zlevel << "\n"
-      << "NV = " << _config.NV << "\n"
-      << "mu = " << _config.mu << "\n"
+      << "zlevel_relative = " << _config.zlevel_rel << "\n"
+      << "avg_fiberlength = " << _config.EL << "\n"
+      << "vol_fiber = " << _config.Vf << "\n"
       << "fdiam = " << _config.fdiam << "\n"
+      << "mu = " << _config.mu << "\n"
       << "sigmafu = " << _config.sigmafu << "\n"
       << "d_end = " << _config.d_end << "\n"
       << "n_d = " << _config.n_d << "\n"
       << "weib_m = " << _config.weib_m << "\n"
       << "weib_xc = " << _config.weib_xc << "\n"
       << "fis_k = " << _config.fis_k << "\n"
-      << "fis_b = " << _config.fis_b << "\n"
-      << "fis_x0 = " << _config.fis_x0 << "\n"
-      << "fis_c = " << _config.fis_c << "\n"
       ;
 }
 
