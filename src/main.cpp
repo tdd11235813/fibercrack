@@ -69,8 +69,14 @@ void run( const Options& _options )
      << "\n";
   fs.close();
 
+  if(app.verbose()) {
+    std::cout << "> cuda_initialize\n";
+  }
   cuda_initialize( app );
 
+  if(app.verbose()) {
+    std::cout << "> cuda_compute_number_of_fibers\n";
+  }
   cuda_compute_number_of_fibers(app, numbers_fibers.data());
 
   fs.open(app.output_file(), std::ofstream::out | std::ofstream::app);
@@ -83,8 +89,8 @@ void run( const Options& _options )
 
     uint nr_fibers = numbers_fibers[j];
 
-    if(_options.verbose()) {
-      std::cout << nr_fibers << " fiber objects.\n";
+    if(app.verbose()) {
+      std::cout << "> iteration "<<j<<" with "<<nr_fibers << " fiber objects.\n";
     }
 
     Data<T> data;
@@ -92,7 +98,7 @@ void run( const Options& _options )
 
     int nr_intersections = cuda_create_and_intersect_fibers(app, data, nr_fibers);
     if(app.verbose()) {
-      std::cout << nr_intersections << " intersections found.\n";
+      std::cout << "> ... "<< nr_intersections << " intersections found.\n";
     }
 
 
@@ -123,6 +129,9 @@ void run( const Options& _options )
     cuda_compact_data(data, nr_intersections, nr_fibers);
 
 
+    if(app.verbose()) {
+      std::cout << "> enter crack computations\n";
+    }
     // n_d times summation of forces with different d
     for( uint k=0; k<config.n_d; ++k ) {
 
@@ -169,7 +178,7 @@ int main(int _argc, char** _argv)
 
   if(options.verbose()) {
     std::cout
-      << "\nfibercrack - 04/2017\n\n"
+      << "\nfibercrack - 05/2017\n\n"
       << listCudaDevices().str() << "\n";
   }
 

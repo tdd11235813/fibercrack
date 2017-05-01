@@ -27,7 +27,7 @@ public:
     po::variables_map vm;
     try {
       po::parsed_options parsed
-        = po::command_line_parser( _argc, _argv ).options(desc).allow_unregistered().run();
+        = po::command_line_parser( _argc, _argv ).options(desc).run();
       po::store(parsed, vm);
 
       if( vm.count("dump")  ) {

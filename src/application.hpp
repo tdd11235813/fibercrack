@@ -5,6 +5,11 @@
 #include "options.hpp"
 #include "configuration.hpp"
 #include <boost/core/noncopyable.hpp>
+#include <stdexcept>
+
+#ifndef PI
+#define PI 3.14159265359
+#endif
 
 template<typename T>
 class Application : private boost::noncopyable {
@@ -29,17 +34,26 @@ public:
         verbose_(_verbose)
     {
     _conf.fis_b = 2.0/(2.0*_conf.fis_k
-                                + sqrt(4.0*_conf.fis_k*_conf.fis_k+4.0));
+                       + sqrt(4.0*_conf.fis_k*_conf.fis_k+4.0));
     _conf.fis_x0= (1.0-_conf.fis_b)/(1.0+_conf.fis_b);
     _conf.fis_c = _conf.fis_k*_conf.fis_x0
       + 2.0*log(1.0-_conf.fis_x0*_conf.fis_x0);
-    _conf.Af = 0.25 * _conf.fdiam * _conf.diam * PI;
+
+    _conf.Af = 0.25 * _conf.fdiam * _conf.fdiam * PI;
     _conf.NV = _conf.Vf/(_conf.Af*_conf.EL);
     _conf.lambda = _conf.xmax * _conf.ymax * _conf.zmax * _conf.NV;
     _conf.zlevel_abs = _conf.zlevel_rel * _conf.zmax;
 
+    _conf.nfm = _conf.Ef/_conf.Em;
+    _conf.nfm_Vf = _conf.nfm * _conf.Vf;
+    if(_conf.nfm_Vf*_conf.nfm_Vf > 2.0)
+      throw std::runtime_error("nfm_Vf^2 must be <= 2.0");
+
     configuration_ = _conf;
 
+    if(verbose()) {
+      std::cout << _conf;
+    }
 
     CHECK_CUDA( cudaDeviceGetAttribute(&number_sm_, cudaDevAttrMultiProcessorCount, device_id()) );
 
